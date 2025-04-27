@@ -4,10 +4,27 @@ from api.projects import projects_api
 from api.managers import managers_api
 from api.staff import staff_api
 
-app=Flask(__name__)
+from flask_migrate import Migrate
+from flask_cors import CORS
+
+app=Flask(__name__,static_folder='img')
 app.register_blueprint(projects_api, url_prefix='/projects')
 app.register_blueprint(managers_api, url_prefix='/managers')
 app.register_blueprint(staff_api, url_prefix='/staff')
+
+CORS(app, resources={r"/x": {"origins": "x"}})
+
+class Config(object):
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@localhost:3306/flask_test'
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+app.config.from_object(Config)
+
+from models import db
+db.init_app(app)
+
+migrate = Migrate(app, db)
 
 @app.route('/')
 def hello_world():
